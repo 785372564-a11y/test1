@@ -26,7 +26,7 @@ interface ViewState {
 export const useViewStore = create<ViewState>((set) => ({
   showGrid: false,
   postFx: true,
-  concreteOpacity: 0.08,
+  concreteOpacity: 0.45,
   showConcrete: true,
   showRebar: true,
   showStirrups: true,

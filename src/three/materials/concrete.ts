@@ -10,11 +10,11 @@ export function getConcreteMaterial(opacity: number, visible = true): THREE.Mesh
   if (cached && Math.abs(cachedOpacity - opacity) < 1e-3 && cachedVisible === visible) return cached;
   if (!normalTex) normalTex = makeConcreteNormalMap();
   const m = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#cbc6bd'),
-    roughness: 0.88,
-    metalness: 0.0,
+    color: new THREE.Color('#7a8492'),
+    roughness: 0.85,
+    metalness: 0.05,
     normalMap: normalTex,
-    normalScale: new THREE.Vector2(0.4, 0.4),
+    normalScale: new THREE.Vector2(0.5, 0.5),
     transparent: opacity < 0.99,
     opacity,
     depthWrite: opacity > 0.95,
