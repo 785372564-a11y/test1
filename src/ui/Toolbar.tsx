@@ -13,11 +13,17 @@ export default function Toolbar() {
   const set = useViewStore((s) => s.set);
   return (
     <div className="absolute top-4 left-4 right-4 flex items-center gap-2 z-10 pointer-events-none">
-      <div className="panel pointer-events-auto flex items-center gap-2.5 px-3 py-1.5">
-        <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="logo" className="w-7 h-7 object-contain" />
+      <div className="panel pointer-events-auto flex items-center gap-3 pl-2 pr-4 py-1.5 shadow-2xl ring-1 ring-sky-500/30">
+        <img
+          src={`${import.meta.env.BASE_URL}logo-mark-alpha.png`}
+          alt="logo"
+          className="w-12 h-12 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.55)]"
+        />
         <div className="flex flex-col leading-tight">
-          <span className="text-[13px] font-semibold tracking-wide">新旅建设集团</span>
-          <span className="text-[10px] text-slate-500">钢筋平法 3D · 22G101</span>
+          <span className="text-base font-bold tracking-wide bg-gradient-to-r from-emerald-300 via-sky-300 to-blue-400 bg-clip-text text-transparent">
+            新旅建设集团
+          </span>
+          <span className="text-[11px] text-slate-400 tracking-wider">XINLV · 钢筋平法 3D · 22G101</span>
         </div>
       </div>
 
