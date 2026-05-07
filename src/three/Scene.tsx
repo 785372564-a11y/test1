@@ -12,7 +12,7 @@ export default function Scene() {
       shadows
       dpr={[1, 2]}
       camera={{ position: [4.5, 3.5, 5], fov: 40, near: 0.05, far: 200 }}
-      gl={{ antialias: true, logarithmicDepthBuffer: true }}
+      gl={{ antialias: true, logarithmicDepthBuffer: true, localClippingEnabled: true } as any}
     >
       <color attach="background" args={['#ffffff']} />
 

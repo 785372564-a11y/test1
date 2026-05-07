@@ -1,6 +1,6 @@
 import { useModelStore, type ComponentKind } from '@/store/modelStore';
 import { useViewStore } from '@/store/viewStore';
-import { Boxes, Palette, Wrench } from 'lucide-react';
+import { Boxes, Palette } from 'lucide-react';
 
 const TABS: { kind: ComponentKind; label: string; icon: any }[] = [
   { kind: 'beam', label: '梁 KL', icon: Boxes },
@@ -13,10 +13,12 @@ export default function Toolbar() {
   const set = useViewStore((s) => s.set);
   return (
     <div className="absolute top-4 left-4 right-4 flex items-center gap-2 z-10 pointer-events-none">
-      <div className="panel pointer-events-auto flex items-center gap-2 px-3 py-1.5">
-        <Wrench size={14} className="text-sky-400" />
-        <span className="text-sm font-semibold tracking-wide">钢筋平法 3D</span>
-        <span className="text-[10px] text-slate-500 px-1.5 py-0.5 rounded bg-slate-800">22G101</span>
+      <div className="panel pointer-events-auto flex items-center gap-2.5 px-3 py-1.5">
+        <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="logo" className="w-7 h-7 object-contain" />
+        <div className="flex flex-col leading-tight">
+          <span className="text-[13px] font-semibold tracking-wide">新旅建设集团</span>
+          <span className="text-[10px] text-slate-500">钢筋平法 3D · 22G101</span>
+        </div>
       </div>
 
       <div className="panel pointer-events-auto flex items-center gap-1 px-1.5 py-1">
