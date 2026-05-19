@@ -1,0 +1,45 @@
+# 每日股票分析配置
+
+# A 股代码 (akshare 格式: 6 位数字)
+# 示例: 600519=贵州茅台, 000001=平安银行, 300750=宁德时代
+a_shares:
+  - code: "600519"
+    name: "贵州茅台"
+  - code: "000001"
+    name: "平安银行"
+  - code: "300750"
+    name: "宁德时代"
+  - code: "601318"
+    name: "中国平安"
+
+# 美股代码 (yfinance 格式: ticker)
+us_stocks:
+  - code: "AAPL"
+    name: "苹果"
+  - code: "MSFT"
+    name: "微软"
+  - code: "NVDA"
+    name: "英伟达"
+  - code: "TSLA"
+    name: "特斯拉"
+
+# 分析参数
+analysis:
+  # 历史 K 线天数 (用于计算 MA/RSI/MACD)
+  lookback_days: 120
+  # 移动均线周期
+  ma_periods: [5, 10, 20, 60]
+  # RSI 周期
+  rsi_period: 14
+  # 信号阈值
+  rsi_oversold: 30
+  rsi_overbought: 70
+  # 涨跌幅警示阈值 (绝对值百分比)
+  change_alert_pct: 5.0
+
+# 飞书推送
+feishu:
+  # 卡片标题
+  title: "📊 每日股票分析报告"
+  # 卡片主题色: blue / red / green / orange / grey / turquoise / purple / wathet / indigo / yellow / carmine
+  card_color: "blue"

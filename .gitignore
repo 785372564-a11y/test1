@@ -4,3 +4,10 @@ dist
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Python / daily_stock_analysis
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
