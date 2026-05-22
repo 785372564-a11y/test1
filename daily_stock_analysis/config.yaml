@@ -27,6 +27,8 @@ a_shares:
     name: "科创etf"
   - code: "513010"
     name: "恒科etf"
+  - code: "603128"
+    name: "华贸物流"
 
 # 美股代码 (yfinance 格式: ticker)
 us_stocks:
