@@ -60,10 +60,19 @@ def _normalize_kline(df: pd.DataFrame, lookback_days: int) -> Optional[pd.DataFr
     return df.tail(lookback_days).reset_index(drop=True)
 
 
+def _sina_symbol(code: str) -> str:
+    """将 6 位代码转换为新浪格式: sh600519 / sz000001."""
+    if code.startswith("6") or code.startswith("5"):
+        return f"sh{code}"
+    return f"sz{code}"
+
+
 def fetch_a_share(code: str, lookback_days: int = 120) -> Optional[pd.DataFrame]:
     """拉取 A 股 / ETF 历史日 K 线 (前复权).
 
-    自动根据代码判断为个股还是 ETF，采用不同接口。
+    三级 fallback:
+      1. 东财 (境内快, GitHub Actions 可能被屏蔽)
+      2. 新浪 (境外可达, 通用 fallback)
     返回 DataFrame 列: date, open, high, low, close, volume
     """
     try:
@@ -76,6 +85,7 @@ def fetch_a_share(code: str, lookback_days: int = 120) -> Optional[pd.DataFrame]
     start_date = (datetime.now() - timedelta(days=lookback_days * 2)).strftime("%Y%m%d")
     is_etf = _is_etf_code(code)
     label = f"{'ETF' if is_etf else 'A股'} {code}"
+    sina_sym = _sina_symbol(code)
 
     # 临时禁用代理 (Windows 本地设了 IE 注册表代理会干扰)
     proxy_keys = ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
@@ -86,32 +96,45 @@ def fetch_a_share(code: str, lookback_days: int = 120) -> Optional[pd.DataFrame]
 
     def _try_etf_em():
         return ak.fund_etf_hist_em(
-            symbol=code,
-            period="daily",
-            start_date=start_date,
-            end_date=end_date,
-            adjust="qfq",
+            symbol=code, period="daily",
+            start_date=start_date, end_date=end_date, adjust="qfq",
         )
 
     def _try_stock_em():
         return ak.stock_zh_a_hist(
-            symbol=code,
-            period="daily",
-            start_date=start_date,
-            end_date=end_date,
-            adjust="qfq",
+            symbol=code, period="daily",
+            start_date=start_date, end_date=end_date, adjust="qfq",
         )
 
-    try:
-        # 主接口: ETF 走 fund_etf_hist_em, 个股走 stock_zh_a_hist
-        primary = _try_etf_em if is_etf else _try_stock_em
-        df = _retry(primary, retries=3, delay=2.0, label=label)
+    def _try_etf_sina():
+        return ak.fund_etf_hist_sina(symbol=sina_sym)
 
-        # Fallback: 互换接口重试一次 (代码判断可能出错, 或某些转型品种)
+    def _try_stock_sina():
+        return ak.stock_zh_a_daily(symbol=sina_sym, adjust="qfq")
+
+    try:
+        # 第一级: 东财接口 (ETF / 个股)
+        primary = _try_etf_em if is_etf else _try_stock_em
+        df = _retry(primary, retries=2, delay=2.0, label=f"{label}[东财]")
+
+        # 第二级: 东财互换 (防代码误判)
         if df is None or df.empty:
             secondary = _try_stock_em if is_etf else _try_etf_em
-            logger.info("%s 主接口无数据, 尝试备用接口", label)
-            df = _retry(secondary, retries=2, delay=2.0, label=f"{label}(备用)")
+            logger.info("%s 东财主接口无数据, 尝试东财备用", label)
+            df = _retry(secondary, retries=1, delay=2.0, label=f"{label}[东财备]")
+
+        # 第三级: 新浪接口 (境外可达, GitHub Actions 通用)
+        if df is None or df.empty:
+            sina_fn = _try_etf_sina if is_etf else _try_stock_sina
+            logger.info("%s 东财全部失败, 切换新浪接口 %s", label, sina_sym)
+            df = _retry(sina_fn, retries=3, delay=2.0, label=f"{label}[新浪]")
+
+        # 新浪也试试互换
+        if df is None or df.empty:
+            sina_alt = _try_stock_sina if is_etf else _try_etf_sina
+            logger.info("%s 新浪主接口无数据, 尝试新浪备用", label)
+            df = _retry(sina_alt, retries=1, delay=2.0, label=f"{label}[新浪备]")
+
     finally:
         for k, v in saved.items():
             if v is not None:
@@ -127,7 +150,7 @@ def fetch_a_share(code: str, lookback_days: int = 120) -> Optional[pd.DataFrame]
 
     out = _normalize_kline(df, lookback_days)
     if out is None:
-        logger.warning("%s 返回空数据", label)
+        logger.warning("%s 所有接口均失败", label)
     return out
 
 
